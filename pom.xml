@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.pmadrid</groupId>
+    <artifactId>dmp-bug</artifactId>
+    <packaging>war</packaging>
+    <version>0.0.1</version>
+    <name>dmp-bug</name>
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <profiles>
+		<profile>
+            <id>test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.21.0</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-it-database</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <images>
+                                        <image>
+                                            <name>postgres:9.6.3</name>
+                                            <alias>postgres963</alias>
+                                            <run>
+                                                <env>
+                                                    <POSTGRES_PASSWORD>colombia</POSTGRES_PASSWORD>
+                                                    <POSTGRES_DB>pmadrid</POSTGRES_DB>
+                                                    <POSTGRES_USER>pmadrid</POSTGRES_USER>
+                                                </env>
+                                                <tmpfs>
+                                                    <mount>/var/lib/postgresql/data:rw</mount>
+                                                </tmpfs>
+                                                <ports>
+                                                    <port>5444:5432</port>
+                                                </ports>
+                                                <namingStrategy>alias</namingStrategy>
+                                                <wait>
+                                                    <log>(?s)ready to accept connections.*ready to accept connections</log>
+                                                    <time>90000</time>
+                                                </wait>
+                                            </run>
+                                        </image>
+                                    </images>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>remove-it-database</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
